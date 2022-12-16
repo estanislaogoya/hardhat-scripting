@@ -7,7 +7,7 @@ module.exports = {
     hardhat: {
       forking: {
         enabled: true,
-        url: 'https://eth-mainnet.g.alchemy.com/v2/<>'
+        url: 'to-be-replaced'
       },
       chainId: 1
     }

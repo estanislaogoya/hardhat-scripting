@@ -25,26 +25,22 @@ const TOKEN_DECIMAL_BASE = "2000000"
 const DATA = '0x2e95b6c8000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000017700000000000000000000000000000000000000000000000000000000000000bb30000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000100000000000000003b6d03406491f4cf9c084ef8fc055eaaf735bdceccf69370cfee7c08'
 
 function getERC20Value(token_decimals){
-    console.log(token_decimals);
-    console.log(hre.ethers.utils.parseUnits(TOKEN_DECIMAL_BASE, token_decimals));
     return hre.ethers.utils.parseUnits(TOKEN_DECIMAL_BASE, token_decimals)
 }
 
 async function main() {
-    for (let spender in AGG_CONTRACT_SPENDERS) {
-        console.log(spender);
+    for (let spender of AGG_CONTRACT_SPENDERS) {
+
         for (let token_address in ETHEREUM_ADDRESSES) {
-            console.log(token_address);
+
             if(token_address != NATIVE_TOKEN_ADDRESS){
                 let current_token_decimals = token_list_decimals[token_address];
-                console.log(current_token_decimals);
 
                 for (let wallet_address of ETHEREUM_ADDRESSES[token_address]) {
-                    console.log(wallet_address);
-                    check_if_has_eth(wallet_address).then((wallet_address)=>{
-                        console.log("Contract: "+spender+"; From: "+wallet_address+"; Token Address: "+token_address+"; ERC20 Value: "+getERC20Value(current_token_decimals));
-                        impersonate_and_allow(spender, wallet_address, token_address, getERC20Value(current_token_decimals));
-                    });
+
+                    await check_if_has_eth(wallet_address);
+                    console.log("Contract: "+spender+"; From: "+wallet_address+"; Token Address: "+token_address+"; ERC20 Value: "+getERC20Value(current_token_decimals));
+                    await impersonate_and_allow(spender, wallet_address, token_address, getERC20Value(current_token_decimals));
                 }
             }
         }
@@ -55,7 +51,7 @@ async function check_if_has_eth(address){
     let signer = await hre.ethers.getImpersonatedSigner(address)
     let balance = await signer.getBalance().then(async (balance) => {
         if (hre.ethers.utils.formatEther(balance) < 1.0) {
-            console.log(await address + " has not enough balance")
+            console.log(address + " has not enough balance")
             await fill_with_gas(address);
             return false;
         }else{
@@ -70,8 +66,12 @@ async function fill_with_gas(to_address) {
     const eth_whale = await hre.ethers.getImpersonatedSigner(ETH_WHALE);
     eth_whale.sendTransaction({
         to: to_address,
+        gasLimit: GAS_LIMIT,
         value: hre.ethers.utils.parseEther("1.0"), // Sends exactly 1.0 ether
-      }).then(()=>{console.log(address + " was filled with gas (1 ETH)");})
+      }).then((transaction)=>{
+        console.log(transaction)
+        console.log(to_address + " was filled with gas (1 ETH)");
+    })
 
 }
 
@@ -81,7 +81,10 @@ async function impersonate_and_allow(spender, from_address, token_address, erc20
 
 
     const destContract = new hre.ethers.Contract(token_address, token_erc20_abi, impersonatedSigner._signer);
-    await destContract.approve(spender, erc20_value).then(x => console.log(x), x => console.log(x));
+    await destContract.approve(spender, erc20_value).then(x => {
+        console.log(x);
+        console.log("Successfully approved Token")
+    });
 
     // const tx = {
     //     to: SPENDER,

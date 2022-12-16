@@ -7,7 +7,8 @@ set allowance:
 2) For each token, sends approve transaction for top 5 addresses to be able to swap later on
 3) TBD: Sends raw transactions to estimate gas
 
+
+replace RCP URL on -> `hardhat.config.js`
 ```shell
-npx hardhat node
 npx hardhat run scripts/set_allowance.js
 ```
