@@ -1,8 +1,8 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/Users/estanigoya/Documents/GitHub/hardhat-scripting/contracts/Lock.sol": {
-      "lastModificationDate": 1671222775573,
+    "/Users/brunitob/GitHub/hardhat-scripting/contracts/Lock.sol": {
+      "lastModificationDate": 1671242624555,
       "contentHash": "ae66265769cc28ebdaa34881df95bc5e",
       "sourceName": "contracts/Lock.sol",
       "solcConfig": {

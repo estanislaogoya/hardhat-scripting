@@ -7,7 +7,7 @@ module.exports = {
     hardhat: {
       forking: {
         enabled: true,
-        url: 'to-be-replaced'
+        url: 'https://eth.senseinode.com'
       },
       chainId: 1
     }
