@@ -10,6 +10,7 @@ const token_list_decimals = require("../data/token_list.json");
 const ETHEREUM_ADDRESSES = require("../data/token_holders/ethereum.json");
 
 const ETH_WHALE = "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296";
+
 const AGG_CONTRACT_SPENDERS = [
     "0x1111111254fb6c44bac0bed2854e76f90643097d", //1Inch
     "0xdef171fe48cf0115b1d80b88dc8eab59176fee57", //Paraswap
