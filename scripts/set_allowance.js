@@ -10,18 +10,17 @@ const token_list_decimals = require("../data/token_list.json");
 const ETHEREUM_ADDRESSES = require("../data/token_holders/ethereum.json");
 
 const ETH_WHALE = "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296";
-const AGG_CONTRACT_SPENDERS = ["0x1111111254fb6c44bac0bed2854e76f90643097d"];
 
-const FROM_ADDRESS = "0x72a53cdbbcc1b9efa39c834a540550e23463aacb";
-
-const TOKEN_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+const AGG_CONTRACT_SPENDERS = [
+    "0x1111111254fb6c44bac0bed2854e76f90643097d", //1Inch
+    "0xdef171fe48cf0115b1d80b88dc8eab59176fee57", //Paraswap
+    "0xdef1c0ded9bec7f1a1670819833240f027b25eff", //Matcha
+];
 
 const NATIVE_TOKEN_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-const ERC20_VALUE = 6000000;
+
 const GAS_LIMIT = 8000000;
-const TOKEN_DECIMAL_BASE = "2000000";
-const DATA =
-    "0x2e95b6c8000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000017700000000000000000000000000000000000000000000000000000000000000bb30000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000100000000000000003b6d03406491f4cf9c084ef8fc055eaaf735bdceccf69370cfee7c08";
+const TOKEN_DECIMAL_BASE = "9000000";
 
 function getERC20Value(token_decimals) {
     return hre.ethers.utils.parseUnits(TOKEN_DECIMAL_BASE, token_decimals);
@@ -93,8 +92,18 @@ async function fill_with_gas(to_address) {
                 );
             });
     } catch (error) {
+        console.log(await get_balance_from_address(ETH_WHALE));
         console.log("fill_with_gas_3", error);
+        console.log("Detail Address", to_address);
     }
+}
+
+async function get_balance_from_address(
+    address
+){
+    let signer = await hre.ethers.getImpersonatedSigner(address).then(async (signer) => {
+        return signer.getBalance();
+    }); 
 }
 
 async function impersonate_and_allow(
@@ -108,11 +117,24 @@ async function impersonate_and_allow(
     );
     console.log("impersonate_and_allow", await impersonatedSigner.getBalance());
 
-    // const destContract = new hre.ethers.Contract(token_address, token_erc20_abi, impersonatedSigner._signer);
-    // await destContract.approve(spender, erc20_value).then(x => {
-    //     console.log(x);
-    //     console.log("Successfully approved Token")
-    // });
+    const destContract = new hre.ethers.Contract(token_address, token_erc20_abi, impersonatedSigner._signer);
+    
+    try {
+        await destContract
+            .approve(spender, erc20_value)
+            .then(x => {
+                console.log(x);
+                console.log("Successfully approved Token")
+            });
+    } catch (error) {
+        // Print log errors to debug: Could be that address already has allowance
+        console.log(destContract.allowance(from_address, spender));
+        console.log("Error:", error);
+        console.log("Spender:", spender);
+        console.log("From:", from_address);
+        console.log("Token:", token_address);
+        console.log("Value:", erc20_value);
+    }
 
     // const tx = {
     //     to: SPENDER,
